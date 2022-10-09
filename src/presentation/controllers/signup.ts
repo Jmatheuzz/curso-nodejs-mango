@@ -5,11 +5,13 @@ import { Controller } from '../protocols/controller'
 export class SignUpController implements Controller {
   constructor (private readonly emailValidator: EmailValidator) {}
   handle (httpRequest: HttpRequest): HttpResponse {
+    const { name, email, password, passwordConfirmation } = httpRequest.body
     try {
-      if (!httpRequest.body.name) {
+      if (!name) {
         return badRequest(new MissingParamError('name'))
       }
-      if (!httpRequest.body.email) {
+
+      if (!email) {
         return badRequest(new MissingParamError('email'))
       }
 
@@ -19,8 +21,9 @@ export class SignUpController implements Controller {
           return badRequest(new MissingParamError(field))
         }
       }
+      if (!this.emailValidator.isValid(email)) return badRequest(new InvalidParamError('email'))
 
-      if (!this.emailValidator.isValid(httpRequest.body.email)) return badRequest(new InvalidParamError('email'))
+      if (password !== passwordConfirmation) return badRequest(new InvalidParamError('passwordConfirmation'))
     } catch (error) {
       return serverError()
     }
