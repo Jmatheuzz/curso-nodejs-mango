@@ -1,6 +1,6 @@
 import { SignUpController } from './signup'
 import { MissingParamError, InvalidParamError, ServerError } from '../../errors'
-import { EmailValidator } from '../../protocols/email-validator'
+import { EmailValidator } from '../../protocols'
 import { AddAccount, AddAccountModel } from '../../../domain/usecases'
 import { AccountModel } from '../../../domain/models'
 describe('SignUp Controller', () => {
