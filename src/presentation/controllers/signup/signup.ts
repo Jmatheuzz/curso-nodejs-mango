@@ -5,7 +5,7 @@ import { badRequest, serverError, ok } from '../../helpers'
 export class SignUpController implements Controller {
   constructor (private readonly emailValidator: EmailValidator, private readonly addAccount: AddAccount) {}
 
-  handle (httpRequest: HttpRequest): HttpResponse {
+  async handle (httpRequest: HttpRequest): Promise<HttpResponse> {
     const { name, email, password, passwordConfirmation } = httpRequest.body
     try {
       if (!name) {
@@ -25,7 +25,7 @@ export class SignUpController implements Controller {
       if (!this.emailValidator.isValid(email)) return badRequest(new InvalidParamError('email'))
 
       if (password !== passwordConfirmation) return badRequest(new InvalidParamError('passwordConfirmation'))
-      const account = this.addAccount.add({ name, email, password })
+      const account = await this.addAccount.add({ name, email, password })
       return ok(account)
     } catch (error) {
       return serverError()
