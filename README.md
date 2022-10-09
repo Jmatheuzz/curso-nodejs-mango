@@ -17,16 +17,16 @@ O objetivo do treinamento é mostrar como criar uma API com uma arquitetura bem 
 - Composition Over Inheritance
 - Small Commits
 ##  Design Patterns
--Factory
--Adapter
--Composite
--Decorator
--Proxy
--Dependency Injection
--Abstract Server
--Composition Root
--Builder
--Singleton
+- Factory
+- Adapter
+- Composite
+- Decorator
+- Proxy
+- Dependency Injection
+- Abstract Server
+- Composition Root
+- Builder
+- Singleton
 ##  Metodologias e Designs
 - TDD
 - Clean Architecture
