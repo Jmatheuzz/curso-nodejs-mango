@@ -1,10 +1,13 @@
 import { SignUpController } from './signup'
 import { MissingParamError, InvalidParamError, ServerError } from '../errors'
 import { EmailValidator } from '../protocols'
+import { AddAccount, AddAccountModel } from '../../domain/usecases'
+import { AccountModel } from '../../domain/models'
 describe('SignUp Controller', () => {
   interface SutTypes {
     sut: SignUpController
     emailValidator: EmailValidator
+    addAccount: AddAccount
   }
 
   const makeEmailValidator = (): EmailValidator => {
@@ -16,10 +19,25 @@ describe('SignUp Controller', () => {
     return new EmailValidatorStub()
   }
 
+  const makeAddAccount = (): AddAccount => {
+    class AddAccountStub implements AddAccount {
+      add (account: AddAccountModel): AccountModel {
+        const fakeAccount = {
+          id: 'any_id',
+          name: 'any_name',
+          email: 'any@email.com'
+        }
+        return fakeAccount
+      }
+    }
+    return new AddAccountStub()
+  }
+
   const makeSut = (): SutTypes => {
     const emailValidator = makeEmailValidator()
-    const sut = new SignUpController(emailValidator)
-    return { sut, emailValidator }
+    const addAccount = makeAddAccount()
+    const sut = new SignUpController(emailValidator, addAccount)
+    return { sut, emailValidator, addAccount }
   }
 
   test('Should return 400 if no name is provided', () => {
@@ -117,6 +135,24 @@ describe('SignUp Controller', () => {
     }
     sut.handle(httpRequest)
     expect(isValidSpy).toHaveBeenCalledWith('any@email.com')
+  })
+  test('Should call AddAccount with correct values', () => {
+    const { sut, addAccount } = makeSut()
+    const addSpy = jest.spyOn(addAccount, 'add')
+    const httpRequest = {
+      body: {
+        name: 'any_name',
+        email: 'any@email.com',
+        password: 'any_pass',
+        passwordConfirmation: 'any_pass'
+      }
+    }
+    sut.handle(httpRequest)
+    expect(addSpy).toHaveBeenCalledWith({
+      name: 'any_name',
+      email: 'any@email.com',
+      password: 'any_pass'
+    })
   })
 
   test('Should return 500 if EmailValidator throws', () => {
