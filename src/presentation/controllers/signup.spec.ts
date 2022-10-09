@@ -6,16 +6,31 @@ describe('SignUp Controller', () => {
     sut: SignUpController
     emailValidator: EmailValidator
   }
-  class EmailValidatorStub implements EmailValidator {
-    isValid (email: string): boolean {
-      return true
+
+  const makeEmailValidator = (): EmailValidator => {
+    class EmailValidatorStub implements EmailValidator {
+      isValid (email: string): boolean {
+        return true
+      }
     }
+    return new EmailValidatorStub()
   }
+
+  const makeEmailValidatorWithError = (): EmailValidator => {
+    class EmailValidatorStub implements EmailValidator {
+      isValid (email: string): boolean {
+        throw new Error()
+      }
+    }
+    return new EmailValidatorStub()
+  }
+
   const makeSut = (): SutTypes => {
-    const emailValidator = new EmailValidatorStub()
+    const emailValidator = makeEmailValidator()
     const sut = new SignUpController(emailValidator)
     return { sut, emailValidator }
   }
+
   test('Should return 400 if no name is provided', () => {
     const { sut } = makeSut()
     const httpRequest = {
@@ -98,24 +113,20 @@ describe('SignUp Controller', () => {
     sut.handle(httpRequest)
     expect(isValidSpy).toHaveBeenCalledWith('any@email.com')
   })
-})
-test('Should return 500 if EmailValidator throws', () => {
-  class EmailValidatorStub implements EmailValidator {
-    isValid (email: string): boolean {
-      throw new Error()
+
+  test('Should return 500 if EmailValidator throws', () => {
+    const emailValidator = makeEmailValidatorWithError()
+    const sut = new SignUpController(emailValidator)
+    const httpRequest = {
+      body: {
+        name: 'any_name',
+        email: 'any@email.com',
+        password: 'any_pass',
+        passwordConfirmation: 'any_pass'
+      }
     }
-  }
-  const emailValidator = new EmailValidatorStub()
-  const sut = new SignUpController(emailValidator)
-  const httpRequest = {
-    body: {
-      name: 'any_name',
-      email: 'any@email.com',
-      password: 'any_pass',
-      passwordConfirmation: 'any_pass'
-    }
-  }
-  const httpResponse = sut.handle(httpRequest)
-  expect(httpResponse.statusCode).toBe(500)
-  expect(httpResponse.body).toEqual(new ServerError())
+    const httpResponse = sut.handle(httpRequest)
+    expect(httpResponse.statusCode).toBe(500)
+    expect(httpResponse.body).toEqual(new ServerError())
+  })
 })
