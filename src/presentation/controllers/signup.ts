@@ -1,5 +1,5 @@
 import { HttpResponse, HttpRequest, EmailValidator } from '../protocols'
-import { MissingParamError, InvalidParamError, ServerError } from '../errors'
+import { MissingParamError, InvalidParamError } from '../errors'
 import { badRequest, serverError } from '../errors/http'
 import { Controller } from '../protocols/controller'
 export class SignUpController implements Controller {
@@ -22,7 +22,7 @@ export class SignUpController implements Controller {
 
       if (!this.emailValidator.isValid(httpRequest.body.email)) return badRequest(new InvalidParamError('email'))
     } catch (error) {
-      return serverError(new ServerError())
+      return serverError()
     }
   }
 }
